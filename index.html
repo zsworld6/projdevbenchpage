@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+    content="ProjDevBench: Benchmarking AI Coding Agents on End-to-End Project Development">
+  <meta name="keywords"
+    content="ProjDevBench, AI Coding Agents, Benchmark, Software Development, Code Generation, LLM, End-to-End Development">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ProjDevBench: Benchmarking AI Coding Agents on End-to-End Project Development</title>
+
+  <link rel="icon" type="image/png" href="static/images/tasks.png">
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+  <style>
+    .hidden {
+      display: none !important;
+    }
+
+    .lang-switch {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 20px;
+      padding: 5px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .lang-btn {
+      background: none;
+      border: none;
+      padding: 8px 12px;
+      cursor: pointer;
+      border-radius: 15px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .lang-btn.active {
+      background: #3273dc;
+      color: white;
+    }
+
+    .lang-btn:hover {
+      background: #f0f0f0;
+    }
+
+    .lang-btn.active:hover {
+      background: #2366d1;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 5px;
+      border: 1px solid #ddd;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 8px;
+    }
+
+    th {
+      background-color: #f2f2f2;
+      border-bottom: 2px solid #ddd;
+    }
+
+    td:hover {
+      background-color: #ffffff;
+    }
+
+    .leaderboard-label {
+      display: inline-block;
+      padding: 4px 8px;
+      margin: 2px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .columns {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .column {
+      flex: 1;
+      min-width: 100%;
+    }
+
+    table {
+      width: 100%;
+      min-width: 100%;
+    }
+
+    .centered-footer {
+      text-align: center;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 50%, #3182ce 100%);
+      color: white;
+    }
+
+    .hero .title {
+      color: white;
+    }
+
+    .section {
+      padding: 3rem 1.5rem;
+    }
+
+    .notification {
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .tabs {
+      margin-bottom: 1rem;
+    }
+
+    .tab-content {
+      min-height: 200px;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      padding: 1rem;
+    }
+
+    .select select {
+      border-radius: 6px;
+      border: 2px solid #e0e0e0;
+      transition: border-color 0.3s ease;
+    }
+
+    .select select:focus {
+      border-color: #3273dc;
+      box-shadow: 0 0 0 3px rgba(50, 115, 220, 0.1);
+    }
+
+    .box {
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .publication-links {
+      margin-top: 1rem;
+    }
+
+    .publication-links .button {
+      margin: 0.2rem;
+    }
+
+    .navbar {
+      background-color: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+    }
+
+    .stat-box {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+      margin: 0.5rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #2c5282;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: #4a5568;
+      margin-top: 0.5rem;
+    }
+
+    .category-card {
+      background: white;
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 0.5rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      border-left: 4px solid #3182ce;
+    }
+
+    .highlight-row {
+      background-color: rgba(50, 130, 206, 0.1) !important;
+    }
+
+    .best-score {
+      color: #2563eb;
+      font-weight: bold;
+    }
+
+    .problem-table {
+      font-size: 13px;
+    }
+
+    .problem-table th {
+      position: sticky;
+      top: 0;
+      background-color: #f2f2f2;
+      z-index: 10;
+    }
+
+    .difficulty-easy {
+      background-color: #d4edda;
+      color: #155724;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .difficulty-hard {
+      background-color: #f8d7da;
+      color: #721c24;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .agent-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      margin: 2px;
+    }
+
+    .agent-cursor {
+      background-color: #e8f4fd;
+      color: #1565c0;
+    }
+
+    .agent-copilot {
+      background-color: #f3e5f5;
+      color: #7b1fa2;
+    }
+
+    .agent-claude {
+      background-color: #fff3e0;
+      color: #e65100;
+    }
+
+    .agent-augment {
+      background-color: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .agent-codex {
+      background-color: #fce4ec;
+      color: #c2185b;
+    }
+
+    .agent-gemini {
+      background-color: #e0f2f1;
+      color: #00695c;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Language Switch -->
+  <div class="lang-switch">
+    <button class="lang-btn active" onclick="switchLanguage('en')">EN</button>
+    <button class="lang-btn" onclick="switchLanguage('zh')">中文</button>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="navbar" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+      <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </a>
+    </div>
+    <div class="navbar-menu">
+      <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
+        <a class="navbar-item" href="#abstract">
+          <span class="lang-en">Abstract</span>
+          <span class="lang-zh hidden">摘要</span>
+        </a>
+        <a class="navbar-item" href="#leaderboard">
+          <span class="lang-en">Leaderboard</span>
+          <span class="lang-zh hidden">排行榜</span>
+        </a>
+        <a class="navbar-item" href="#problems">
+          <span class="lang-en">Problems</span>
+          <span class="lang-zh hidden">题目</span>
+        </a>
+        <a class="navbar-item" href="#methodology">
+          <span class="lang-en">Methodology</span>
+          <span class="lang-zh hidden">方法</span>
+        </a>
+        <a class="navbar-item" href="https://github.com/projdevbench/projdevbench" target="_blank">
+          <span class="icon"><i class="fab fa-github"></i></span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column has-text-centered">
+            <h1 class="title is-1 publication-title">
+              <span class="lang-en">ProjDevBench: Benchmarking AI Coding Agents on End-to-End Project Development</span>
+              <span class="lang-zh hidden">ProjDevBench: AI编程智能体端到端项目开发基准测试</span>
+            </h1>
+            <div class="is-size-5 publication-authors" style="margin-top: 1.5rem;">
+              <span class="author-block">Pengrui Lu<sup>*1,3</sup>,</span>
+              <span class="author-block">Shiqi Zhang<sup>*1</sup>,</span>
+              <span class="author-block">Yunzhong Hou<sup>*2</sup>,</span>
+              <span class="author-block">Lyumanshan Ye<sup>1</sup>,</span>
+              <span class="author-block">Chaoyi Huang<sup>1</sup>,</span>
+              <span class="author-block">Zixi Chen<sup>1</sup>,</span>
+              <span class="author-block">Ji Zeng<sup>1</sup>,</span>
+              <span class="author-block">Hantao Jiang<sup>1</sup>,</span>
+              <span class="author-block">Pengfei Liu<sup>†1</sup>,</span>
+              <span class="author-block">Yiwei Wang<sup>†3</sup>,</span>
+              <span class="author-block">Ming-Hsuan Yang<sup>†3</sup></span>
+            </div>
+
+            <div class="is-size-6 publication-authors" style="margin-top: 0.8rem;">
+              <span class="lang-en"><sup>1</sup>Shanghai Jiao Tong University, <sup>2</sup>Beijing Institute of Technology, <sup>3</sup>UC Merced</span>
+              <span class="lang-zh hidden"><sup>1</sup>上海交通大学, <sup>2</sup>北京理工大学, <sup>3</sup>加州大学默塞德分校</span>
+            </div>
+
+            <div class="is-size-6 publication-authors" style="margin-top: 0.5rem; opacity: 0.9;">
+              <span class="lang-en">*Equal contribution, †Corresponding authors</span>
+              <span class="lang-zh hidden">*同等贡献, †通讯作者</span>
+            </div>
+
+            <div class="column has-text-centered">
+              <div class="publication-links">
+                <span class="link-block">
+                  <a href="#" target="_blank" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon"><i class="fas fa-file-pdf"></i></span>
+                    <span class="lang-en">Paper</span>
+                    <span class="lang-zh hidden">论文</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a href="https://github.com/projdevbench/projdevbench" target="_blank"
+                    class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon"><i class="fab fa-github"></i></span>
+                    <span class="lang-en">Code</span>
+                    <span class="lang-zh hidden">代码</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a href="#leaderboard" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <p style="font-size:18px">🏆</p>
+                    </span>
+                    <span class="lang-en">Leaderboard</span>
+                    <span class="lang-zh hidden">排行榜</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a href="#problems" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon"><i class="fas fa-tasks"></i></span>
+                    <span class="lang-en">Problems</span>
+                    <span class="lang-zh hidden">题目</span>
+                  </a>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Task Comparison Image -->
+  <section class="section" style="padding-top: 2rem; padding-bottom: 1rem;">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column is-four-fifths">
+          <div class="content has-text-centered">
+            <img src="static/images/tasks.png" style="width: 100%; max-width: 700px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);"
+              alt="Task Comparison" />
+          </div>
+          <p class="has-text-centered is-size-6" style="color: #666; margin-top: 1rem;">
+            <span class="lang-en"><em>Task comparison: Unlike benchmarks where coding agents modify code snippets from pre-existing codebases, ProjDevBench evaluates end-to-end repository construction from project-level requirements.</em></span>
+            <span class="lang-zh hidden"><em>任务对比：与从现有代码库修改代码片段的基准不同，ProjDevBench评估从项目级需求进行端到端仓库构建的能力。</em></span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Statistics Section -->
+  <section class="section" style="padding-top: 1rem;">
+    <div class="container" style="max-width: 1100px;">
+      <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: nowrap;">
+        <div class="stat-box" style="flex: 1; min-width: 0;">
+          <div class="stat-number">20</div>
+          <div class="stat-label lang-en">Problems</div>
+          <div class="stat-label lang-zh hidden">问题数</div>
+        </div>
+        <div class="stat-box" style="flex: 1; min-width: 0;">
+          <div class="stat-number">8</div>
+          <div class="stat-label lang-en">Categories</div>
+          <div class="stat-label lang-zh hidden">类别数</div>
+        </div>
+        <div class="stat-box" style="flex: 1; min-width: 0;">
+          <div class="stat-number">6</div>
+          <div class="stat-label lang-en">Agents</div>
+          <div class="stat-label lang-zh hidden">智能体数</div>
+        </div>
+        <div class="stat-box" style="flex: 1; min-width: 0;">
+          <div class="stat-number">138</div>
+          <div class="stat-label lang-en">Avg. Turns</div>
+          <div class="stat-label lang-zh hidden">平均轮数</div>
+        </div>
+        <div class="stat-box" style="flex: 1; min-width: 0;">
+          <div class="stat-number">27.38%</div>
+          <div class="stat-label lang-en">Acceptance</div>
+          <div class="stat-label lang-zh hidden">通过率</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Abstract Section -->
+  <section class="section" id="abstract">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">
+            <span class="lang-en">Abstract</span>
+            <span class="lang-zh hidden">摘要</span>
+          </h2>
+          <div class="content has-text-justified">
+            <p class="lang-en">
+              Recent coding agents can generate complete codebases from simple prompts, yet existing evaluations focus on issue-level bug fixing and lag behind end-to-end development. We introduce <strong>ProjDevBench</strong>, an end-to-end benchmark that provides project requirements to coding agents and evaluates the resulting repositories.
+            </p>
+            <p class="lang-zh hidden">
+              近期的编程智能体能够从简单的提示生成完整的代码库，但现有评估主要集中在问题级别的错误修复上，滞后于端到端开发。我们介绍<strong>ProjDevBench</strong>，一个为编程智能体提供项目需求并评估生成仓库的端到端基准测试。
+            </p>
+
+            <p class="lang-en">
+              Combining Online Judge (OJ) testing with LLM-assisted code review, the benchmark evaluates agents on (1) system architecture design, (2) functional correctness, and (3) iterative solution refinement. We curate <strong>20 programming problems</strong> across <strong>8 categories</strong>, covering both concept-oriented tasks and real-world application scenarios, and evaluate <strong>six coding agents</strong> built on different LLM backends.
+            </p>
+            <p class="lang-zh hidden">
+              结合在线评测系统（OJ）测试和LLM辅助代码审查，该基准测试从以下三个方面评估智能体：(1) 系统架构设计，(2) 功能正确性，(3) 迭代解决方案优化。我们精选了<strong>20个编程问题</strong>，涵盖<strong>8个类别</strong>，包括概念导向任务和真实世界应用场景，并评估了基于不同LLM后端构建的<strong>六个编程智能体</strong>。
+            </p>
+
+            <div align="center" style="margin: 2rem 0;">
+              <img src="static/images/benchmark_pipeline.png" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);"
+                alt="Benchmark Pipeline" />
+              <p class="is-size-6" style="color: #666; margin-top: 0.8rem;">
+                <span class="lang-en"><em>Overview of the ProjDevBench evaluation pipeline.</em></span>
+                <span class="lang-zh hidden"><em>ProjDevBench评估流程概览。</em></span>
+              </p>
+            </div>
+
+            <h3 class="title is-4" style="margin-top: 2rem;">
+              <span class="lang-en">Key Features</span>
+              <span class="lang-zh hidden">主要特点</span>
+            </h3>
+
+            <ul class="lang-en">
+              <li><b>End-to-End Project Construction:</b> Agents build complete repositories from scratch, not just patches or single files.</li>
+              <li><b>Dual Evaluation Protocol:</b> Combines Online Judge execution-based testing with LLM-assisted code review for comprehensive assessment.</li>
+              <li><b>Diagnostic Feedback:</b> Fine-grained verdict-level signals (Wrong Answer, TLE, MLE, Runtime Error, etc.) enable systematic failure analysis.</li>
+              <li><b>Multi-Agent Support:</b> Evaluate Claude Code, Cursor, Gemini CLI, Codex, Augment, and GitHub Copilot.</li>
+              <li><b>Extended Interaction:</b> Tasks demand sustained agent-environment interaction, averaging 138 turns and 4.81M tokens per problem.</li>
+            </ul>
+
+            <ul class="lang-zh hidden">
+              <li><b>端到端项目构建：</b>智能体从头构建完整的代码仓库，而非仅生成补丁或单文件。</li>
+              <li><b>双重评估协议：</b>结合在线评测系统的执行测试和LLM辅助代码审查进行综合评估。</li>
+              <li><b>诊断反馈：</b>细粒度的判定级信号（答案错误、超时、内存超限、运行时错误等）支持系统性故障分析。</li>
+              <li><b>多智能体支持：</b>评估Claude Code、Cursor、Gemini CLI、Codex、Augment和GitHub Copilot。</li>
+              <li><b>扩展交互：</b>任务需要持续的智能体-环境交互，每个问题平均138轮交互和481万token。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Leaderboard Section -->
+  <section class="section" id="leaderboard" style="background-color: #f8f9fa;">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">
+            <span class="lang-en">🏆 Leaderboard</span>
+            <span class="lang-zh hidden">🏆 排行榜</span>
+          </h2>
+          <div class="content">
+            <div class="content has-text-justified">
+              <p class="lang-en">
+                Performance on ProjDevBench across six coding agents and multiple LLM backends. <strong>Exec.</strong> represents the execution score from Online Judge, <strong>CR</strong> represents the code review score, and <strong>Final</strong> is the weighted combination (80% Exec. + 20% CR).
+              </p>
+              <p class="lang-zh hidden">
+                六个编程智能体和多个LLM后端在ProjDevBench上的表现。<strong>Exec.</strong>代表在线评测系统的执行分数，<strong>CR</strong>代表代码审查分数，<strong>Final</strong>是加权组合（80% Exec. + 20% CR）。
+              </p>
+            </div>
+
+            <div class="agent-labels-container" style="margin-bottom: 1rem;">
+              <span class="agent-badge agent-codex">Codex</span>
+              <span class="agent-badge agent-cursor">Cursor</span>
+              <span class="agent-badge agent-augment">Augment</span>
+              <span class="agent-badge agent-claude">Claude Code</span>
+              <span class="agent-badge agent-copilot">GitHub Copilot</span>
+              <span class="agent-badge agent-gemini">Gemini CLI</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="columns is-centered">
+        <div class="column" style="max-width: 1200px;">
+          <div style="overflow-x: auto;">
+            <table id="leaderboard-table" class="table">
+              <thead>
+                <tr>
+                  <th style="min-width: 50px;">
+                    <strong class="lang-en">Rank</strong>
+                    <strong class="lang-zh hidden">排名</strong>
+                  </th>
+                  <th style="min-width: 120px;">
+                    <strong class="lang-en">Agent</strong>
+                    <strong class="lang-zh hidden">智能体</strong>
+                  </th>
+                  <th style="min-width: 150px;">
+                    <strong class="lang-en">Model</strong>
+                    <strong class="lang-zh hidden">模型</strong>
+                  </th>
+                  <th>
+                    <strong class="lang-en">Easy Exec.</strong>
+                    <strong class="lang-zh hidden">简单执行</strong>
+                  </th>
+                  <th>
+                    <strong class="lang-en">Easy CR</strong>
+                    <strong class="lang-zh hidden">简单CR</strong>
+                  </th>
+                  <th>
+                    <strong class="lang-en">Hard Exec.</strong>
+                    <strong class="lang-zh hidden">困难执行</strong>
+                  </th>
+                  <th>
+                    <strong class="lang-en">Hard CR</strong>
+                    <strong class="lang-zh hidden">困难CR</strong>
+                  </th>
+                  <th>
+                    <strong class="lang-en">Overall Exec.</strong>
+                    <strong class="lang-zh hidden">总执行</strong>
+                  </th>
+                  <th>
+                    <strong class="lang-en">Overall CR</strong>
+                    <strong class="lang-zh hidden">总CR</strong>
+                  </th>
+                  <th style="min-width: 80px;">
+                    <strong class="lang-en">Final ↓</strong>
+                    <strong class="lang-zh hidden">最终 ↓</strong>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="highlight-row">
+                  <td>🥇</td>
+                  <td><span class="agent-badge agent-codex">Codex</span></td>
+                  <td>GPT-5</td>
+                  <td><span class="best-score">79.24</span></td>
+                  <td>82.11</td>
+                  <td><span class="best-score">69.22</span></td>
+                  <td>82.90</td>
+                  <td><span class="best-score">76.73</span></td>
+                  <td>82.31</td>
+                  <td><span class="best-score">77.85</span></td>
+                </tr>
+                <tr>
+                  <td>🥈</td>
+                  <td><span class="agent-badge agent-cursor">Cursor</span></td>
+                  <td>Gemini-3-Pro-Preview</td>
+                  <td>72.87</td>
+                  <td>88.67</td>
+                  <td>71.47</td>
+                  <td>80.03</td>
+                  <td>72.52</td>
+                  <td>86.51</td>
+                  <td>75.32</td>
+                </tr>
+                <tr>
+                  <td>🥉</td>
+                  <td><span class="agent-badge agent-augment">Augment</span></td>
+                  <td>GPT-5</td>
+                  <td>77.10</td>
+                  <td>76.00</td>
+                  <td>57.22</td>
+                  <td>65.03</td>
+                  <td>72.13</td>
+                  <td>73.26</td>
+                  <td>72.35</td>
+                </tr>
+                <tr>
+                  <td>4</td>
+                  <td><span class="agent-badge agent-cursor">Cursor</span></td>
+                  <td>GPT-5</td>
+                  <td>69.74</td>
+                  <td>80.56</td>
+                  <td>67.80</td>
+                  <td>87.27</td>
+                  <td>69.26</td>
+                  <td>82.23</td>
+                  <td>71.85</td>
+                </tr>
+                <tr>
+                  <td>5</td>
+                  <td><span class="agent-badge agent-cursor">Cursor</span></td>
+                  <td>Sonnet-4.5</td>
+                  <td>71.12</td>
+                  <td>85.67</td>
+                  <td>60.17</td>
+                  <td>66.47</td>
+                  <td>68.39</td>
+                  <td>80.87</td>
+                  <td>70.88</td>
+                </tr>
+                <tr>
+                  <td>6</td>
+                  <td><span class="agent-badge agent-augment">Augment</span></td>
+                  <td>Sonnet-4.5</td>
+                  <td>69.14</td>
+                  <td><span class="best-score">92.56</span></td>
+                  <td>56.81</td>
+                  <td>67.43</td>
+                  <td>66.06</td>
+                  <td>86.28</td>
+                  <td>70.10</td>
+                </tr>
+                <tr>
+                  <td>7</td>
+                  <td><span class="agent-badge agent-claude">Claude Code</span></td>
+                  <td>Sonnet-4.5</td>
+                  <td>66.85</td>
+                  <td>92.89</td>
+                  <td>54.47</td>
+                  <td>78.57</td>
+                  <td>63.76</td>
+                  <td><span class="best-score">89.31</span></td>
+                  <td>68.87</td>
+                </tr>
+                <tr>
+                  <td>8</td>
+                  <td><span class="agent-badge agent-gemini">Gemini CLI</span></td>
+                  <td>Gemini-3-Pro-Preview</td>
+                  <td>74.57</td>
+                  <td>80.33</td>
+                  <td>35.53</td>
+                  <td><span class="best-score">94.20</span></td>
+                  <td>64.81</td>
+                  <td>83.80</td>
+                  <td>68.61</td>
+                </tr>
+                <tr>
+                  <td>9</td>
+                  <td><span class="agent-badge agent-copilot">GitHub Copilot</span></td>
+                  <td>Sonnet-4.5</td>
+                  <td>71.10</td>
+                  <td>87.89</td>
+                  <td>36.63</td>
+                  <td>80.23</td>
+                  <td>62.48</td>
+                  <td>85.97</td>
+                  <td>67.18</td>
+                </tr>
+                <tr>
+                  <td>10</td>
+                  <td><span class="agent-badge agent-codex">Codex</span></td>
+                  <td>Sonnet-4.5</td>
+                  <td>66.07</td>
+                  <td>68.22</td>
+                  <td>31.88</td>
+                  <td>83.23</td>
+                  <td>57.52</td>
+                  <td>71.98</td>
+                  <td>60.41</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Key Findings -->
+    <div class="container is-max-desktop" style="margin-top: 2rem;">
+      <div class="columns is-centered">
+        <div class="column is-four-fifths">
+          <div class="box" style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f8ff 100%);">
+            <h3 class="title is-5">
+              <span class="lang-en">📊 Key Findings</span>
+              <span class="lang-zh hidden">📊 主要发现</span>
+            </h3>
+            <ul class="lang-en">
+              <li><strong>Best Overall:</strong> Codex + GPT-5 achieves 77.85% final score, leading in execution performance.</li>
+              <li><strong>Model Impact:</strong> GPT-5 generally excels at execution, while Sonnet-4.5 shows stronger code review compliance.</li>
+              <li><strong>Framework Stability:</strong> Cursor and Augment demonstrate stable performance across different base models, with all configurations achieving final scores above 70%.</li>
+              <li><strong>Hard vs Easy:</strong> Performance gaps widen significantly on from-scratch construction tasks (Hard problems).</li>
+            </ul>
+            <ul class="lang-zh hidden">
+              <li><strong>最佳表现：</strong>Codex + GPT-5达到77.85%的最终分数，在执行性能上领先。</li>
+              <li><strong>模型影响：</strong>GPT-5通常在执行方面表现出色，而Sonnet-4.5在代码审查合规性方面更强。</li>
+              <li><strong>框架稳定性：</strong>Cursor和Augment在不同基础模型上表现稳定，所有配置的最终分数都超过70%。</li>
+              <li><strong>难易对比：</strong>在从头构建任务（困难问题）上，性能差距显著扩大。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Submission Status Distribution -->
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">
+            <span class="lang-en">📈 Submission Status Distribution</span>
+            <span class="lang-zh hidden">📈 提交状态分布</span>
+          </h2>
+          <div class="content has-text-justified">
+            <p class="lang-en">
+              Analysis of submission outcomes across all agents reveals that only 27.38% of submissions were accepted, with the majority failing due to wrong answers (41.86%) or time limit violations (13.91%).
+            </p>
+            <p class="lang-zh hidden">
+              对所有智能体提交结果的分析显示，只有27.38%的提交被接受，大多数失败是由于答案错误（41.86%）或超时（13.91%）。
+            </p>
+          </div>
+
+          <div style="overflow-x: auto; margin-top: 1.5rem;">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>
+                    <span class="lang-en">Status Type</span>
+                    <span class="lang-zh hidden">状态类型</span>
+                  </th>
+                  <th>
+                    <span class="lang-en">Count</span>
+                    <span class="lang-zh hidden">数量</span>
+                  </th>
+                  <th>
+                    <span class="lang-en">Percentage</span>
+                    <span class="lang-zh hidden">百分比</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="background-color: #d4edda;">
+                  <td><strong>Accepted</strong></td>
+                  <td>484</td>
+                  <td>27.38%</td>
+                </tr>
+                <tr>
+                  <td>Wrong Answer</td>
+                  <td>740</td>
+                  <td>41.86%</td>
+                </tr>
+                <tr>
+                  <td>Time Limit Exceeded</td>
+                  <td>246</td>
+                  <td>13.91%</td>
+                </tr>
+                <tr>
+                  <td>Runtime Error</td>
+                  <td>124</td>
+                  <td>7.01%</td>
+                </tr>
+                <tr>
+                  <td>Compile Error</td>
+                  <td>80</td>
+                  <td>4.52%</td>
+                </tr>
+                <tr>
+                  <td>Memory Leak</td>
+                  <td>62</td>
+                  <td>3.51%</td>
+                </tr>
+                <tr>
+                  <td>Memory Limit Exceeded</td>
+                  <td>24</td>
+                  <td>1.36%</td>
+                </tr>
+                <tr>
+                  <td>Others</td>
+                  <td>8</td>
+                  <td>0.45%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Problems Section -->
+  <section class="section" id="problems" style="background-color: #f8f9fa;">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">
+            <span class="lang-en">📋 Problem Details</span>
+            <span class="lang-zh hidden">📋 题目详情</span>
+          </h2>
+          <div class="content has-text-justified">
+            <p class="lang-en">
+              ProjDevBench contains 20 problems across 8 categories. <strong>Easy</strong> problems provide a partial codebase (project-completion), while <strong>Hard</strong> problems require from-scratch construction (project-creation).
+            </p>
+            <p class="lang-zh hidden">
+              ProjDevBench包含8个类别的20个问题。<strong>简单</strong>问题提供部分代码库（项目完善），而<strong>困难</strong>问题需要从头构建（项目创建）。
+            </p>
+          </div>
+
+          <div class="content has-text-centered" style="margin: 1.5rem 0;">
+            <img src="static/images/category_pie_chart.png" style="width: 100%; max-width: 450px; border-radius: 8px;"
+              alt="Category Distribution" />
+            <p class="is-size-6" style="color: #666; margin-top: 0.8rem;">
+              <span class="lang-en"><em>Distribution of ProjDevBench tasks across 8 categories.</em></span>
+              <span class="lang-zh hidden"><em>ProjDevBench任务在8个类别中的分布。</em></span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="columns is-centered">
+        <div class="column" style="max-width: 1200px;">
+          <div style="overflow-x: auto; max-height: 500px;">
+            <table class="table problem-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>
+                    <span class="lang-en">Problem Name</span>
+                    <span class="lang-zh hidden">问题名称</span>
+                  </th>
+                  <th>
+                    <span class="lang-en">Category</span>
+                    <span class="lang-zh hidden">类别</span>
+                  </th>
+                  <th>
+                    <span class="lang-en">Difficulty</span>
+                    <span class="lang-zh hidden">难度</span>
+                  </th>
+                  <th>
+                    <span class="lang-en">Time Limit</span>
+                    <span class="lang-zh hidden">时间限制</span>
+                  </th>
+                  <th>
+                    <span class="lang-en">Memory Limit</span>
+                    <span class="lang-zh hidden">内存限制</span>
+                  </th>
+                  <th>
+                    <span class="lang-en">Avg Score</span>
+                    <span class="lang-zh hidden">平均分</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>001</td>
+                  <td>A+B Problem</td>
+                  <td>Algorithm</td>
+                  <td><span class="difficulty-easy">Easy</span></td>
+                  <td>1s</td>
+                  <td>256 MiB</td>
+                  <td>54.37</td>
+                </tr>
+                <tr>
+                  <td>002</td>
+                  <td>int2048 Big Integer</td>
+                  <td>Algorithm</td>
+                  <td><span class="difficulty-easy">Easy</span></td>
+                  <td>10s</td>
+                  <td>190 MiB</td>
+                  <td>48.19</td>
+                </tr>
+                <tr>
+                  <td>003</td>
+                  <td>ICPC Management System</td>
+                  <td>Management</td>
+                  <td><span class="difficulty-hard">Hard</span></td>
+                  <td>2s</td>
+                  <td>512 MiB</td>
+                  <td>52.07</td>
+                </tr>
+                <tr>
+                  <td>004</td>
+                  <td>Bookstore System</td>
+                  <td>Management</td>
+                  <td><span class="difficulty-hard">Hard</span></td>
+                  <td>10s</td>
+                  <td>64 MiB</td>
+                  <td>36.29</td>
+                </tr>
+                <tr>
+                  <td>005</td>
+                  <td>QOI Format Codec</td>
+                  <td>Algorithm</td>
+                  <td><span class="difficulty-easy">Easy</span></td>
+                  <td>10s</td>
+                  <td>512 MiB</td>
+                  <td>58.87</td>
+                </tr>
+                <tr>
+                  <td>006</td>
+                  <td>Minesweeper</td>
+                  <td>Game</td>
+                  <td><span class="difficulty-easy">Easy</span></td>
+                  <td>30s</td>
+                  <td>256 MiB</td>
+                  <td>53.51</td>
+                </tr>
+                <tr>
+                  <td>007</td>
+                  <td>BASIC Interpreter</td>
+                  <td>Interpreter</td>
+                  <td><span class="difficulty-easy">Easy</span></td>
+                  <td>5s</td>
+                  <td>256 MiB</td>
+                  <td>47.67</td>
+                </tr>
+                <tr>
+                  <td>008</td>
+                  <td>MOV Language</td>
+                  <td>Assembly</td>
+                  <td><span class="difficulty-easy">Easy</span></td>
+                  <td>-</td>
+                  <td>-</td>
+                  <td>54.70</td>
+                </tr>
+                <tr>
+                  <td>009</td>
+                  <td>STLite Vector</td>
+                  <td>Data Structure</td>
+                  <td><span class="difficulty-easy">Easy</span></td>
+                  <td>100s</td>
+                  <td>768 MiB</td>
+                  <td>58.46</td>
+                </tr>
+                <tr>
+                  <td>010</td>
+                  <td>STLite List</td>
+                  <td>Data Structure</td>
+                  <td><span class="difficulty-easy">Easy</span></td>
+                  <td>25s</td>
+                  <td>768 MiB</td>
+                  <td>30.76</td>
+                </tr>
+                <tr>
+                  <td>011</td>
+                  <td>STLite Priority Queue</td>
+                  <td>Data Structure</td>
+                  <td><span class="difficulty-easy">Easy</span></td>
+                  <td>15s</td>
+                  <td>512 MiB</td>
+                  <td>57.25</td>
+                </tr>
+                <tr>
+                  <td>012</td>
+                  <td>STLite Linked HashMap</td>
+                  <td>Data Structure</td>
+                  <td><span class="difficulty-easy">Easy</span></td>
+                  <td>24s</td>
+                  <td>893 MiB</td>
+                  <td>43.36</td>
+                </tr>
+                <tr>
+                  <td>013</td>
+                  <td>STLite Map</td>
+                  <td>Data Structure</td>
+                  <td><span class="difficulty-easy">Easy</span></td>
+                  <td>30s</td>
+                  <td>893 MiB</td>
+                  <td>58.21</td>
+                </tr>
+                <tr>
+                  <td>014</td>
+                  <td>Python Interpreter</td>
+                  <td>Interpreter</td>
+                  <td><span class="difficulty-easy">Easy</span></td>
+                  <td>16s</td>
+                  <td>512 MiB</td>
+                  <td>46.23</td>
+                </tr>
+                <tr>
+                  <td>015</td>
+                  <td>File Storage</td>
+                  <td>Storage</td>
+                  <td><span class="difficulty-hard">Hard</span></td>
+                  <td>16s</td>
+                  <td>6 MiB</td>
+                  <td>42.71</td>
+                </tr>
+                <tr>
+                  <td>016</td>
+                  <td>File Storage BPT</td>
+                  <td>Storage</td>
+                  <td><span class="difficulty-hard">Hard</span></td>
+                  <td>5s</td>
+                  <td>64 MiB</td>
+                  <td>40.11</td>
+                </tr>
+                <tr>
+                  <td>017</td>
+                  <td>Train Ticket System</td>
+                  <td>Management</td>
+                  <td><span class="difficulty-hard">Hard</span></td>
+                  <td>40s</td>
+                  <td>47 MiB</td>
+                  <td>53.24</td>
+                </tr>
+                <tr>
+                  <td>018</td>
+                  <td>Scheme Interpreter</td>
+                  <td>Interpreter</td>
+                  <td><span class="difficulty-easy">Easy</span></td>
+                  <td>1.5s</td>
+                  <td>244 MiB</td>
+                  <td>32.94</td>
+                </tr>
+                <tr>
+                  <td>019</td>
+                  <td>GPU Memory Optimization</td>
+                  <td>Optimization</td>
+                  <td><span class="difficulty-easy">Easy</span></td>
+                  <td>1s</td>
+                  <td>244 MiB</td>
+                  <td>36.89</td>
+                </tr>
+                <tr>
+                  <td>020</td>
+                  <td>Buddy Algorithm</td>
+                  <td>Optimization</td>
+                  <td><span class="difficulty-easy">Easy</span></td>
+                  <td>10s</td>
+                  <td>244 MiB</td>
+                  <td>33.33</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="is-size-7 has-text-centered" style="color: #666; margin-top: 0.5rem;">
+            <span class="lang-en"><strong>Difficulty Definition:</strong> Easy = Project-completion (partial codebase provided), Hard = Project-creation (from-scratch construction)</span>
+            <span class="lang-zh hidden"><strong>难度定义：</strong>简单 = 项目完善（提供部分代码），困难 = 项目创建（从头构建）</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Methodology Section -->
+  <section class="section" id="methodology">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">
+            <span class="lang-en">🔬 Evaluation Methodology</span>
+            <span class="lang-zh hidden">🔬 评估方法</span>
+          </h2>
+          <div class="content has-text-justified">
+            <p class="lang-en">
+              ProjDevBench adopts a dual evaluation protocol that distinguishes between hard functional correctness and compliance at the rule level and specification level.
+            </p>
+            <p class="lang-zh hidden">
+              ProjDevBench采用双重评估协议，区分硬性功能正确性和规则级别及规范级别的合规性。
+            </p>
+
+            <div class="columns is-multiline" style="margin-top: 2rem;">
+              <div class="column is-half">
+                <div class="box" style="height: 100%;">
+                  <h4 class="title is-5">
+                    <span class="icon" style="color: #3182ce;"><i class="fas fa-play-circle"></i></span>
+                    <span class="lang-en">Execution-based Evaluation</span>
+                    <span class="lang-zh hidden">基于执行的评估</span>
+                  </h4>
+                  <ul class="lang-en">
+                    <li>Submissions evaluated on <strong>Online Judge</strong> platform</li>
+                    <li>Comprehensive test suites verify functional correctness</li>
+                    <li>Fine-grained verdict signals: CE, RE, WA, TLE, MLE</li>
+                    <li>Weighted partial credit based on test case importance</li>
+                  </ul>
+                  <ul class="lang-zh hidden">
+                    <li>在<strong>在线评测系统</strong>平台上评估提交</li>
+                    <li>综合测试套件验证功能正确性</li>
+                    <li>细粒度判定信号：编译错误、运行时错误、答案错误、超时、内存超限</li>
+                    <li>基于测试用例重要性的加权部分分</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="column is-half">
+                <div class="box" style="height: 100%;">
+                  <h4 class="title is-5">
+                    <span class="icon" style="color: #38a169;"><i class="fas fa-search"></i></span>
+                    <span class="lang-en">Code Review</span>
+                    <span class="lang-zh hidden">代码审查</span>
+                  </h4>
+                  <ul class="lang-en">
+                    <li><strong>Rule-based</strong> Python scripts for explicit violations</li>
+                    <li><strong>LLM-based</strong> review for specification compliance</li>
+                    <li>Detects forbidden library usage and hack solutions</li>
+                    <li>Assesses adherence to submission requirements</li>
+                  </ul>
+                  <ul class="lang-zh hidden">
+                    <li><strong>基于规则</strong>的Python脚本检测明确违规</li>
+                    <li><strong>基于LLM</strong>的规范合规性审查</li>
+                    <li>检测禁用库使用和投机取巧方案</li>
+                    <li>评估对提交要求的遵守程度</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="box" style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f8ff 100%); margin-top: 1.5rem;">
+              <h4 class="title is-5 has-text-centered">
+                <span class="lang-en">Final Scoring Formula</span>
+                <span class="lang-zh hidden">最终评分公式</span>
+              </h4>
+              <p class="has-text-centered" style="font-size: 1.2rem;">
+                <strong>Final Score = 0.8 × Execution Score + 0.2 × Code Review Score</strong>
+              </p>
+              <p class="has-text-centered is-size-6" style="color: #666; margin-top: 0.5rem;">
+                <span class="lang-en">Prioritizes functional correctness while penalizing specification violations.</span>
+                <span class="lang-zh hidden">优先考虑功能正确性，同时惩罚规范违规。</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Failure Analysis Section -->
+  <section class="section" style="background-color: #f8f9fa;">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">
+            <span class="lang-en">🔍 Where End-to-End Coding Agents Fail</span>
+            <span class="lang-zh hidden">🔍 端到端编程智能体的失败之处</span>
+          </h2>
+          <div class="content has-text-justified">
+            <div class="columns is-multiline">
+              <div class="column is-half">
+                <div class="category-card">
+                  <h5 class="title is-6">
+                    <span class="lang-en">Specification Misalignment</span>
+                    <span class="lang-zh hidden">规范不匹配</span>
+                  </h5>
+                  <p class="is-size-7 lang-en">Agents frequently generate syntactically correct frameworks but omit critical business logic, fail to distinguish development from submission contexts.</p>
+                  <p class="is-size-7 lang-zh hidden">智能体经常生成语法正确的框架但遗漏关键业务逻辑，无法区分开发和提交上下文。</p>
+                </div>
+              </div>
+              <div class="column is-half">
+                <div class="category-card">
+                  <h5 class="title is-6">
+                    <span class="lang-en">Edge Case Handling</span>
+                    <span class="lang-zh hidden">边界情况处理</span>
+                  </h5>
+                  <p class="is-size-7 lang-en">Systematic weaknesses in boundary condition handling, leading to Wrong Answer and Runtime Error failures including null pointer dereferences.</p>
+                  <p class="is-size-7 lang-zh hidden">边界条件处理方面存在系统性弱点，导致答案错误和运行时错误失败，包括空指针解引用。</p>
+                </div>
+              </div>
+              <div class="column is-half">
+                <div class="category-card">
+                  <h5 class="title is-6">
+                    <span class="lang-en">Time Complexity Issues</span>
+                    <span class="lang-zh hidden">时间复杂度问题</span>
+                  </h5>
+                  <p class="is-size-7 lang-en">Agents favor familiar but suboptimal patterns, using O(log N) maps where O(1) hash tables suffice, leading to TLE submissions.</p>
+                  <p class="is-size-7 lang-zh hidden">智能体偏好熟悉但次优的模式，在O(1)哈希表足够时使用O(log N)的map，导致超时提交。</p>
+                </div>
+              </div>
+              <div class="column is-half">
+                <div class="category-card">
+                  <h5 class="title is-6">
+                    <span class="lang-en">Resource Management</span>
+                    <span class="lang-zh hidden">资源管理</span>
+                  </h5>
+                  <p class="is-size-7 lang-en">Significant limitations in exception safety and memory management, preferring manual new/delete over RAII patterns, causing memory leaks.</p>
+                  <p class="is-size-7 lang-zh hidden">在异常安全和内存管理方面存在重大限制，偏好手动new/delete而非RAII模式，导致内存泄漏。</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">
+            <span class="lang-en">📬 Contact</span>
+            <span class="lang-zh hidden">📬 联系方式</span>
+          </h2>
+          <div class="content has-text-justified">
+            <p class="lang-en">
+              If you have any questions regarding ProjDevBench, feel free to reach out to us via email at <a href="mailto:lupengrui@sjtu.edu.cn">lupengrui@sjtu.edu.cn</a>, or directly submit a <a href="https://github.com/projdevbench/projdevbench/issues" target="_blank">GitHub issue</a>.
+            </p>
+            <p class="lang-zh hidden">
+              如果您对ProjDevBench有任何问题，请随时通过电子邮件<a href="mailto:lupengrui@sjtu.edu.cn">lupengrui@sjtu.edu.cn</a>联系我们，或直接提交<a href="https://github.com/projdevbench/projdevbench/issues" target="_blank">GitHub issue</a>。
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer centered-footer">
+    <div class="container">
+      <div class="columns is-centered">
+        <div class="column is-8">
+          <div class="content">
+            <p class="lang-en">
+              This website is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+            </p>
+            <p class="lang-zh hidden">
+              本网站基于<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">知识共享署名-相同方式共享4.0国际许可协议</a>授权。
+            </p>
+            <p style="font-size: 0.85rem; color: #666;">
+              <span class="lang-en">Template inspired by <a href="https://nerfies.github.io/" target="_blank">Nerfies</a> and <a href="https://gair-nlp.github.io/" target="_blank">GAIR-NLP</a>.</span>
+              <span class="lang-zh hidden">模板灵感来自 <a href="https://nerfies.github.io/" target="_blank">Nerfies</a> 和 <a href="https://gair-nlp.github.io/" target="_blank">GAIR-NLP</a>。</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    function switchLanguage(lang) {
+      // Update button states
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+
+      // Toggle language content
+      if (lang === 'en') {
+        document.querySelectorAll('.lang-en').forEach(el => el.classList.remove('hidden'));
+        document.querySelectorAll('.lang-zh').forEach(el => el.classList.add('hidden'));
+      } else {
+        document.querySelectorAll('.lang-en').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.lang-zh').forEach(el => el.classList.remove('hidden'));
+      }
+    }
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+
+    // Navbar burger toggle for mobile
+    document.addEventListener('DOMContentLoaded', () => {
+      const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+      if ($navbarBurgers.length > 0) {
+        $navbarBurgers.forEach(el => {
+          el.addEventListener('click', () => {
+            const target = el.dataset.target;
+            const $target = document.getElementById(target);
+            el.classList.toggle('is-active');
+            if ($target) {
+              $target.classList.toggle('is-active');
+            }
+          });
+        });
+      }
+    });
+  </script>
+
+</body>
+
+</html>
